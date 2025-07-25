@@ -1,27 +1,24 @@
 import { fileURLToPath, URL } from 'node:url'
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
-import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
-    vueDevTools(),
-    tailwindcss(),
   ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
-    },
-  },
-  server: {
-    host: '0.0.0.0', // Allow access from all network interfaces
+    }
   },
   preview: {
-    host: '0.0.0.0', // Allow access from all network interfaces
-    allowedHosts: ['statslife.omont.ch', 'localhost'], // Add the allowed host here
+    allowedHosts: [
+      'statslife.omont.ch'
+    ]
   },
+  server: {
+    host: true, // Needed for proper network access
+    port: 5173, // Default Vite port
+  }
 })
