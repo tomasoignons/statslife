@@ -22,6 +22,6 @@ export default defineConfig({
   },
   preview: {
     host: '0.0.0.0', // Allow access from all network interfaces
-    allowedHosts: ['publibike.omont.ch'], // Add the allowed host here
+    allowedHosts: ['statslife.omont.ch'], // Add the allowed host here
   },
 })
