@@ -12,13 +12,24 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  preview: {
-    allowedHosts: [
-      'statslife.omont.ch'
-    ]
-  },
   server: {
-    host: true, // Needed for proper network access
-    port: 5173, // Default Vite port
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
+    cors: true,
+    proxy: {},
+    hmr: {
+      host: 'statslife.omont.ch',
+      clientPort: 443
+    }
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
+    cors: true,
+    proxy: {},
+    https: true,
+    allowedHosts: ['statslife.omont.ch', 'localhost', '.omont.ch']
   }
 })
