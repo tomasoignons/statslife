@@ -1,0 +1,38 @@
+/* Manual padding styles */
+.network-card {
+    padding: 16px !important;
+}
+
+.network-content {
+    padding: 8px !important;
+}
+
+.network-item {
+    padding: 8px !important;
+}
+
+/* Override any conflicting styles */
+.card-body {
+    padding: 16px !important;
+}
+
+.p-4 {
+    padding: 16px !important;
+}
+
+.p-2 {
+    padding: 8px !important;
+}
+
+/* Additional spacing for better layout */
+.gap-3 {
+    gap: 12px !important;
+}
+
+.mb-4 {
+    margin-bottom: 16px !important;
+}
+
+.pb-2 {
+    padding-bottom: 8px !important;
+} 

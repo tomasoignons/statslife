@@ -75,9 +75,20 @@
       </div>
     </div>
 
+    <!-- Loading Indicator -->
+    <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-1000">
+      <div class="network-card bg-white rounded-lg shadow-lg">
+        <p class="text-lg font-bold mb-4">Loading Tiles...</p>
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+          <div class="bg-blue-600 h-2.5 rounded-full" :style="{ width: `${loadingProgress}%` }"></div>
+        </div>
+        <p class="text-sm text-gray-700 mt-2">{{ loadingProgress }}%</p>
+      </div>
+    </div>
+
     <!-- Password Modal -->
     <dialog id="password_modal" class="modal modal-bottom sm:modal-middle">
-      <div class="modal-box">
+      <div class="modal-box network-card">
         <h3 class="font-bold text-lg mb-4">Enter Password</h3>
         <div class="form-control">
           <input 
@@ -447,41 +458,67 @@ function updateMarkedTiles() {
   })
 }
 
-// Load data from Supabase
+// Add loading state
+const isLoading = ref(false)
+const loadingProgress = ref(0)
+
+// Load data from Supabase with pagination
 async function loadData() {
   try {
     clearLayers()
     markedTiles.value = {}
+    isLoading.value = true
+    loadingProgress.value = 0
 
-    // Load tiles
-    const { data: tiles, error: tilesError } = await supabase
-      .from('tiles')
-      .select('*')
-      .eq('schema', 'statslife')
-    
-    if (tilesError) throw tilesError
+    let hasMore = true
+    let page = 0
+    const pageSize = 1000 // Adjust this based on performance
 
-    if (tiles) {
-      tiles.forEach(tile => {
-        try {
-          const gridId = tile.grid_id
-          const color = tile.color
+    while (hasMore) {
+      const { data: tiles, error: tilesError, count } = await supabase
+        .from('tiles')
+        .select('grid_id, color', { count: 'exact' })
+        .eq('schema', 'statslife')
+        .range(page * pageSize, (page + 1) * pageSize - 1)
 
-          if (!markedTiles.value[color]) {
-            markedTiles.value[color] = new Set()
+      if (tilesError) throw tilesError
+
+      if (tiles) {
+        tiles.forEach(tile => {
+          try {
+            const color = tile.color
+            if (!markedTiles.value[color]) {
+              markedTiles.value[color] = new Set()
+            }
+            markedTiles.value[color].add(tile.grid_id)
+          } catch (e) {
+            console.error('Error processing tile:', e)
           }
-          markedTiles.value[color].add(gridId)
-        } catch (e) {
-          console.error('Error processing tile:', e)
+        })
+
+        // Update progress
+        const total = count || tiles.length
+        loadingProgress.value = Math.min(((page + 1) * pageSize / total) * 100, 100)
+
+        // Check if we need to load more
+        hasMore = tiles.length === pageSize
+        page++
+
+        // Update display periodically to show progress
+        if (page % 2 === 0) {
+          await updateMarkedTiles()
         }
-      })
-      updateMarkedTiles()
+      } else {
+        hasMore = false
+      }
     }
 
-    // Update grid appearance
-    updateVisibleGrid()
+    // Final update of the display
+    await updateMarkedTiles()
+    isLoading.value = false
   } catch (error) {
     console.error('Error loading data:', error)
+    isLoading.value = false
   }
 }
 
@@ -514,18 +551,5 @@ function toggleTileMode() {
 .toggle-sm {
   --toggle-width: 2.5rem;
   --toggle-height: 1.25rem;
-}
-
-/* Explicit padding styles */
-.network-card {
-  padding: 16px;
-}
-
-.network-content {
-  padding: 8px;
-}
-
-.network-item {
-  padding: 8px;
 }
 </style> 
